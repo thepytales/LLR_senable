@@ -290,7 +290,6 @@ const inputState = {
     zoomIn: false, zoomOut: false 
 };
 
-// === ASSETS DEFINITION ===
 const ASSETS = {
   rooms: {
     "raummodell_leer.glb": { 
@@ -337,6 +336,10 @@ const ASSETS = {
                        req: { type: 'view', target: 'board', desc: "Muss zwingend die Tafel / Lehrkraft gut sehen können (Lippenlesen)." } },
     'persona_tim':   { procedural: true, type: 'persona', color: 0x8b5cf6, name: "Tim (Visus 30%)", dims: {x: 0.4, y: 1.0, z: 0.4}, radius: 0.3, seats: 0, yOffset: 0.10, 
                        req: { type: 'proximity', target: 'board', maxDist: 2.5, desc: "Sitzplatz darf max. 2,5m von der Tafel entfernt sein." } },
+    'persona_emma':  { procedural: true, type: 'persona', color: 0xec4899, name: "Emma (Regulär)", dims: {x: 0.4, y: 1.0, z: 0.4}, radius: 0.3, seats: 0, yOffset: 0.10, 
+                       req: { type: 'none', desc: "Lernende ohne sichtbare Einschränkung." } },
+    'persona_leon':  { procedural: true, type: 'persona', color: 0x14b8a6, name: "Leon (Regulär)", dims: {x: 0.4, y: 1.0, z: 0.4}, radius: 0.3, seats: 0, yOffset: 0.10, 
+                       req: { type: 'none', desc: "Lernender ohne sichtbare Einschränkung." } },
 
     // --- Zonen (Nur für Szenario Editor) ---
     'zone_custom': { procedural: true, type: 'zone', color: 0x10b981, name: "Zone", seats: 0, yOffset: 0.125, noShadow: true },
@@ -1896,17 +1899,20 @@ function calcCircle(count, lx, lz) {
 }
 
 window.app.runWizard = async function() {
-    // FIX: Absturz verhindern - Keine Möbel während Simulation
     if (isFirstPersonActive() || isVisionAnalysisMode) {
         showNotification("Funktion in Simulation gesperrt.");
         return;
     }
 
-    saveHistory();
     const scenario = document.getElementById('wizard-scenario').value;
+    if (!scenario) {
+        showNotification("Bitte wählen Sie zuerst ein Szenario aus!");
+        return;
+    }
+
+    saveHistory();
     const count = parseInt(document.getElementById('wizard-count').value);
     
-    // Limits abrufen
     const lx = currentRoomLimits.x - 0.2; 
     const lz = currentRoomLimits.z - 0.2;
     
@@ -1926,7 +1932,6 @@ window.app.runWizard = async function() {
     
     app.clearRoom(false); 
     
-    // Sicherstellen, dass ALLE benötigten Assets (z.B. Tische UND Tafel) geladen sind
     const uniqueTypes = [...new Set(pending.map(p => p.id))];
     let needsLoading = uniqueTypes.some(type => !ASSETS.furniture[type].data);
     
@@ -2769,13 +2774,36 @@ function createFurnitureInstance(typeId, x, z, rotY) {
                 const head = new THREE.Mesh(new THREE.SphereGeometry(0.18, 16, 16), new THREE.MeshStandardMaterial({color: 0xf3f4f6}));
                 head.position.set(0, 0.75, 0); head.castShadow = true;
                 pGroup.add(body, head);
+                
+                // Visuelle Erkennungsmerkmale (echte 3D Geometrien)
+                if (typeId === 'persona_ben') {
+                    const hpMat = new THREE.MeshStandardMaterial({color: 0x222222});
+                    const earL = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.04, 16), hpMat);
+                    earL.rotation.z = Math.PI/2; earL.position.set(-0.18, 0.75, 0);
+                    const earR = earL.clone(); earR.position.set(0.18, 0.75, 0);
+                    const band = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.02, 8, 24, Math.PI), hpMat);
+                    band.position.set(0, 0.75, 0);
+                    pGroup.add(earL, earR, band);
+                } else if (typeId === 'persona_lukas') {
+                    const haMat = new THREE.MeshStandardMaterial({color: 0xef4444}); 
+                    const ha = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.06, 8), haMat);
+                    ha.position.set(0.17, 0.75, 0.05);
+                    pGroup.add(ha);
+                } else if (typeId === 'persona_tim') {
+                    const glMat = new THREE.MeshStandardMaterial({color: 0x111111});
+                    const glassL = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.015, 8, 16), glMat);
+                    glassL.position.set(-0.07, 0.77, 0.17);
+                    const glassR = glassL.clone(); glassR.position.set(0.07, 0.77, 0.17);
+                    const bridge = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.01, 0.01), glMat);
+                    bridge.position.set(0, 0.77, 0.17);
+                    pGroup.add(glassL, glassR, bridge);
+                }
             }
             visual = pGroup;
             wrapper.add(visual);
 
         } else if (info.type === 'zone') {
             wrapper.userData.isZone = true;
-            // Existierende Farbe laden (für Undo/Load) oder Standard nutzen
             const zColor = wrapper.userData.zoneColor !== undefined ? wrapper.userData.zoneColor : info.color;
 
             wrapper.userData.points = wrapper.userData.points || [
@@ -2796,9 +2824,6 @@ function createFurnitureInstance(typeId, x, z, rotY) {
             wireframe.rotation.x = -Math.PI / 2;
             wrapper.add(wireframe);
             wrapper.userData.wireframe = wireframe;
-
-            // WICHTIG: Die Zone bekommt KEINE Hitbox mehr und wird NICHT in interactionMeshes geschoben!
-            // Nur die Handles sind im Edit-Modus klickbar.
             
             window.app.updateZoneGeometry(wrapper);
             visual = wrapper;
@@ -2831,7 +2856,6 @@ function createFurnitureInstance(typeId, x, z, rotY) {
         wrapper.add(visual);
     }
     
-    // Hitbox für alle NICHT-Zonen
     if (info.type !== 'zone') {
         const hW = info.dims ? info.dims.x : 1.0;
         const hD = info.dims ? info.dims.z : 1.0;
@@ -3391,9 +3415,10 @@ window.app.checkScenarioTask = function() {
     const validation = window.app.validateScenario();
     
     let resultHtml = `<div style="display:flex; flex-direction:column; gap:10px; margin-bottom: 20px;">`;
+    const spatialTasks = app.scenarioData.tasks.filter(t => t.type !== 'mc');
     
-    if (validation.results.length === 0) {
-        resultHtml += `<p style="color:#d1d5db;">Es gibt keine räumlichen Überprüfungen. (Multiple Choice Aufgaben lösen Sie im laufenden Spiel).</p>`;
+    if (validation.results.length === 0 && spatialTasks.length > 0) {
+        resultHtml += `<p style="color:#d1d5db;">Es gibt keine räumlichen Überprüfungen.</p>`;
     } else {
         validation.results.forEach(res => {
             const icon = res.passed ? '✅' : '❌';
@@ -3419,19 +3444,27 @@ window.app.checkScenarioTask = function() {
         if (mcTasks.length > 0 && window.app.currentMCIndex < mcTasks.length) {
             document.getElementById('modal-overlay').classList.remove('active');
             
-            const btnCode = `document.getElementById('modal-overlay').classList.remove('active'); app.showMCQuestion(app.scenarioData.tasks.filter(t => t.type === 'mc')[window.app.currentMCIndex]);`;
-            
-            showModal("Räumliche Aufgaben gelöst! 🎉", `
-                <p style="color: white; margin-bottom: 20px;">Hervorragend! Sie haben die räumlichen Anforderungen erfüllt.</p>
-                <div style="background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
-                    <p style="margin: 0; color: #d1d5db; font-size: 13px;">Nun folgen noch kurze Wissensfragen zur Situation im Raum.</p>
-                </div>
-                <button class="primary" style="width: 100%; padding: 12px;" onclick="${btnCode}">Weiter zu den Fragen</button>
-            `);
+            // Nur VOR der allerersten MC Frage das Übergangs-Modal zeigen
+            if (window.app.currentMCIndex === 0) {
+                const titleText = spatialTasks.length > 0 ? "Räumliche Aufgaben gelöst! 🎉" : "Wissensabfrage starten";
+                const descText = spatialTasks.length > 0 ? "Hervorragend! Sie haben die räumlichen Anforderungen erfüllt." : "Beginnen wir mit den Fragen zum Szenario.";
+                const btnCode = `document.getElementById('modal-overlay').classList.remove('active'); app.showMCQuestion(app.scenarioData.tasks.filter(t => t.type === 'mc')[window.app.currentMCIndex]);`;
+                
+                showModal(titleText, `
+                    <p style="color: white; margin-bottom: 20px;">${descText}</p>
+                    <div style="background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
+                        <p style="margin: 0; color: #d1d5db; font-size: 13px;">Nun folgen noch kurze Wissensfragen zur Situation im Raum.</p>
+                    </div>
+                    <button class="primary" style="width: 100%; padding: 12px;" onclick="${btnCode}">Weiter zu den Fragen</button>
+                `);
+            } else {
+                // Wenn wir schon mittendrin sind, nächste Frage direkt aufrufen
+                app.showMCQuestion(mcTasks[window.app.currentMCIndex]);
+            }
         } else {
             showModal("Mission Erfolgreich! 🎉", `
-                <p style="color: white; margin-bottom: 20px;">Hervorragend! Sie haben alle Barrieren beseitigt und die Anforderungen erfüllt.</p>
-                ${resultHtml}
+                <p style="color: white; margin-bottom: 20px;">Hervorragend! Sie haben alle Anforderungen erfüllt und die Übung gemeistert.</p>
+                ${spatialTasks.length > 0 ? resultHtml : ''}
                 <button class="primary" style="width: 100%; padding: 12px;" onclick="app.quitPlayMode()">Übung beenden & Zurück</button>
             `);
             window.app.currentMCIndex = 0;
@@ -3446,26 +3479,76 @@ window.app.checkScenarioTask = function() {
 };
 
 window.app.showMCQuestion = function(task) {
-    document.getElementById('mc-title').innerText = "Wissensabfrage";
-    document.getElementById('mc-question').innerText = task.question;
+    const isMC = task.answers.filter(a => a.correct).length > 1;
+    document.getElementById('mc-title').innerText = isMC ? "Multiple Choice Frage" : "Single Choice Frage";
+    document.getElementById('mc-question').innerText = task.question + (isMC ? " (Mehrere Antworten möglich)" : " (Nur eine Antwort korrekt)");
+    
     const answersDiv = document.getElementById('mc-answers');
     answersDiv.innerHTML = "";
     
     const shuffled = [...task.answers].sort(() => Math.random() - 0.5);
     
-    shuffled.forEach(ans => {
-        const btn = document.createElement('button');
-        btn.className = "primary";
-        btn.style.padding = "12px";
-        btn.style.textAlign = "left";
-        btn.style.height = "auto";
-        btn.style.lineHeight = "1.4";
-        btn.style.marginBottom = "8px";
-        btn.innerText = ans.text;
-        btn.onclick = () => app.resolveMC(ans.correct);
-        answersDiv.appendChild(btn);
+    shuffled.forEach((ans, idx) => {
+        const row = document.createElement('label');
+        row.style.display = "flex";
+        row.style.alignItems = "center";
+        row.style.gap = "10px";
+        row.style.background = "rgba(255,255,255,0.05)";
+        row.style.padding = "12px";
+        row.style.borderRadius = "8px";
+        row.style.cursor = "pointer";
+        row.style.marginBottom = "8px";
+        row.style.border = "1px solid rgba(255,255,255,0.1)";
+
+        const input = document.createElement('input');
+        input.type = isMC ? "checkbox" : "radio";
+        input.name = "mc-answer";
+        input.value = idx;
+        input.dataset.correct = ans.correct;
+        input.style.width = "18px";
+        input.style.height = "18px";
+        input.style.cursor = "pointer";
+
+        const span = document.createElement('span');
+        span.innerText = ans.text;
+        span.style.color = "white";
+        span.style.fontSize = "14px";
+
+        row.appendChild(input);
+        row.appendChild(span);
+        answersDiv.appendChild(row);
     });
     
+    const confirmBtn = document.createElement('button');
+    confirmBtn.className = "primary";
+    confirmBtn.style.width = "100%";
+    confirmBtn.style.padding = "12px";
+    confirmBtn.style.marginTop = "10px";
+    confirmBtn.style.background = "linear-gradient(135deg, #10b981 0%, #059669 100%)";
+    confirmBtn.style.borderColor = "#10b981";
+    confirmBtn.innerText = "Antwort bestätigen";
+    
+    confirmBtn.onclick = () => {
+        const inputs = answersDiv.querySelectorAll('input');
+        let allCorrect = true;
+        let anyChecked = false;
+        
+        inputs.forEach(inp => {
+            const isChecked = inp.checked;
+            const shouldBeChecked = inp.dataset.correct === "true";
+            if (isChecked) anyChecked = true;
+            if (isChecked !== shouldBeChecked) allCorrect = false;
+        });
+        
+        if (!anyChecked) { 
+            showNotification("Bitte wählen Sie eine Antwort aus."); 
+            return; 
+        }
+        
+        app.resolveMC(allCorrect);
+    };
+    
+    answersDiv.appendChild(confirmBtn);
     document.getElementById('scenario-mc-modal').style.display = 'flex';
 };
 
@@ -3477,19 +3560,15 @@ window.app.resolveMC = function(isCorrect) {
     } else {
         showModal("❌ Falsche Antwort", `
             <p style="color: #ef4444; font-weight: bold; font-size: 16px;">Das ist leider nicht die richtige Lösung.</p>
-            <p>Überdenken Sie die Auswirkung der Barriere.</p>
+            <p>Überdenken Sie Ihre Antwort noch einmal.</p>
             <button class="primary" style="margin-top: 15px; width: 100%;" onclick="document.getElementById('modal-overlay').classList.remove('active'); document.getElementById('scenario-mc-modal').style.display='flex';">Nochmal versuchen</button>
         `);
     }
 };
 
-// === SZENARIO BUILDER LOGIK (Editor-Modus) ===
-window.app.scenarioData = {
-    title: "", desc: "", tasks: [] 
-};
-
 window.app.openTaskBuilder = function() {
     const type = document.getElementById('scenario-task-type').value;
+    if (!type) return; 
     let html = "";
 
     if (type === 'mc') {
@@ -3498,21 +3577,25 @@ window.app.openTaskBuilder = function() {
                 <label>Fragestellung</label>
                 <textarea id="build-mc-q" rows="2" placeholder="z.B. Wo sollte der Lernende sitzen?"></textarea>
             </div>
-            <div class="input-group">
-                <label style="color:#10b981;">Richtige Antwort</label>
-                <input type="text" id="build-mc-a1" placeholder="z.B. Vorne links">
-            </div>
-            <div class="input-group">
-                <label style="color:#ef4444;">Falsche Antwort A</label>
-                <input type="text" id="build-mc-a2" placeholder="z.B. Hinten rechts">
-            </div>
-            <div class="input-group">
-                <label style="color:#ef4444;">Falsche Antwort B</label>
-                <input type="text" id="build-mc-a3" placeholder="z.B. Direkt am Fenster">
-            </div>
-            <button class="primary" style="width:100%; margin-top:10px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-color: #10b981;" onclick="app.saveTask('mc')">Aufgabe speichern</button>
+            <p style="font-size:11px; color:#9ca3af; margin-bottom:10px;">
+                Füllen Sie 3 bis 6 Antworten aus und markieren Sie die Checkbox für korrekte Antworten. (1 Haken = Single Choice, mehrere = Multiple Choice)
+            </p>
+            <div id="mc-inputs-container" style="display:flex; flex-direction:column; gap:8px;">
         `;
-        showModal("Multiple Choice erstellen", html);
+        for (let i = 1; i <= 6; i++) {
+            const req = i <= 3 ? " (erforderlich)" : " (optional)";
+            html += `
+                <div class="input-group" style="display:flex; gap:10px; align-items:center; margin-bottom:0;">
+                    <input type="checkbox" id="build-mc-c${i}" ${i===1?'checked':''} style="width:auto; cursor:pointer;">
+                    <input type="text" id="build-mc-a${i}" placeholder="Antwort ${i}${req}" style="flex-grow:1;">
+                </div>
+            `;
+        }
+        html += `
+            </div>
+            <button class="primary" style="width:100%; margin-top:15px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-color: #10b981;" onclick="app.saveTask('mc')">Aufgabe speichern</button>
+        `;
+        showModal("Wissensfrage (SC/MC) erstellen", html);
 
     } else if (type === 'dist') {
         html = `
@@ -3520,6 +3603,7 @@ window.app.openTaskBuilder = function() {
             <div class="input-group">
                 <label>Zu prüfendes Objekt</label>
                 <select id="build-dist-target">
+                    <option value="" disabled selected hidden>Bitte auswählen...</option>
                     <option value="persona_mia">Mia (Rollstuhl)</option>
                     <option value="door_area">Türbereich (Hinten rechts)</option>
                 </select>
@@ -3534,7 +3618,6 @@ window.app.openTaskBuilder = function() {
 
     } else if (type === 'persona') {
         const zones = movableObjects.filter(o => o.userData.isZone);
-        // BUGFIX: Zonen exportId statt nur uuid nutzen!
         let zoneOptions = zones.map(z => `<option value="${z.userData.exportId || z.uuid}">${z.userData.zoneName || 'Zone'}</option>`).join('');
         if(zones.length === 0) zoneOptions = `<option value="">Keine Zonen im Raum vorhanden!</option>`;
 
@@ -3545,23 +3628,28 @@ window.app.openTaskBuilder = function() {
             <div class="input-group">
                 <label>Persona wählen</label>
                 <select id="build-pers-id">
+                    <option value="" disabled selected hidden>Bitte auswählen...</option>
                     <option value="persona_mia">Mia (Rollstuhl)</option>
                     <option value="persona_ben">Ben (ADHS)</option>
                     <option value="persona_lukas">Lukas (Hörschädigung)</option>
                     <option value="persona_tim">Tim (Visus 30%)</option>
+                    <option value="persona_emma">Emma (Regulär)</option>
+                    <option value="persona_leon">Leon (Regulär)</option>
                 </select>
             </div>
             <div class="input-group">
                 <label>Pädagogische Bedingung</label>
                 <select id="build-pers-cond" onchange="document.getElementById('zone-select-group').style.display = this.value === 'in_zone' ? 'block' : 'none'">
-                    <option value="in_zone" selected>Muss in einer markierten Zone stehen (Geodaten)</option>
+                    <option value="" disabled selected hidden>Bitte auswählen...</option>
+                    <option value="in_zone">Muss in einer markierten Zone stehen (Geodaten)</option>
                     <option value="near_board">Muss nah an der Tafel sitzen (Max. 2,5 Meter)</option>
                     <option value="clear_path">Weg zur Tür muss breit genug sein (Rollstuhlgerecht)</option>
                 </select>
             </div>
-            <div class="input-group" id="zone-select-group">
+            <div class="input-group" id="zone-select-group" style="display:none;">
                 <label>Ziel-Zone (Muss vorher gezeichnet werden!)</label>
                 <select id="build-pers-zone">
+                    <option value="" disabled selected hidden>Bitte auswählen...</option>
                     ${zoneOptions}
                 </select>
             </div>
@@ -3597,15 +3685,23 @@ window.app.saveTask = function(type) {
 
     if (type === 'mc') {
         const q = document.getElementById('build-mc-q').value;
-        const a1 = document.getElementById('build-mc-a1').value;
-        const a2 = document.getElementById('build-mc-a2').value;
-        const a3 = document.getElementById('build-mc-a3').value;
-        if(!q || !a1) { showNotification("Bitte Frage und korrekte Antwort ausfüllen!"); return; }
+        let ans = [];
+        for (let i = 1; i <= 6; i++) {
+            const text = document.getElementById(`build-mc-a${i}`).value.trim();
+            const correct = document.getElementById(`build-mc-c${i}`).checked;
+            if (text) {
+                ans.push({ text: text, correct: correct });
+            }
+        }
         
-        newTask = { id: Date.now(), type: 'mc', question: q, answers: [{ text: a1, correct: true }, { text: a2, correct: false }, { text: a3, correct: false }] };
+        if (!q || ans.length < 3) { showNotification("Bitte Frage und mindestens 3 Antworten ausfüllen!"); return; }
+        if (!ans.some(a => a.correct)) { showNotification("Bitte mindestens eine richtige Antwort markieren!"); return; }
+        
+        newTask = { id: Date.now(), type: 'mc', question: q, answers: ans };
     } 
     else if (type === 'dist') {
         const target = document.getElementById('build-dist-target').value;
+        if (!target) { showNotification("Bitte ein Zielobjekt auswählen!"); return; }
         const val = document.getElementById('build-dist-val').value;
         const targetName = target === 'persona_mia' ? "Mia (Rollstuhl)" : "Türbereich";
         
@@ -3614,6 +3710,8 @@ window.app.saveTask = function(type) {
     else if (type === 'persona') {
         const pId = document.getElementById('build-pers-id').value;
         const cond = document.getElementById('build-pers-cond').value;
+        if (!pId || !cond) { showNotification("Bitte Persona und Bedingung auswählen!"); return; }
+        
         const pName = ASSETS.furniture[pId].name;
         
         let zoneId = null;
@@ -3621,8 +3719,7 @@ window.app.saveTask = function(type) {
 
         if (cond === 'in_zone') {
             zoneId = document.getElementById('build-pers-zone').value;
-            if (!zoneId) { showNotification("Bitte zuerst eine Zone im Raum zeichnen!"); return; }
-            // BUGFIX: Zonen über exportId oder uuid finden
+            if (!zoneId) { showNotification("Bitte eine Ziel-Zone auswählen!"); return; }
             const zoneObj = movableObjects.find(o => o.uuid === zoneId || o.userData.exportId === zoneId);
             const zName = zoneObj ? (zoneObj.userData.zoneName || 'Zone') : 'Zone';
             condText = `muss in der Zone "${zName}" platziert werden`;
@@ -3647,6 +3744,11 @@ window.app.saveTask = function(type) {
         app.scenarioData.tasks.push(newTask);
         document.getElementById('modal-overlay').classList.remove('active');
         app.renderTaskList();
+        
+        // Das Dropdown sicher und fehlerfrei zurücksetzen
+        const typeSelect = document.getElementById('scenario-task-type');
+        if (typeSelect) typeSelect.value = "";
+        
         showNotification("Regel hinzugefügt.");
     }
 };

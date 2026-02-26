@@ -1354,6 +1354,7 @@
             <div class="input-group">
               <label>Szenario</label>
               <select id="wizard-scenario">
+                <option value="" disabled selected hidden>Bitte auswählen...</option>
                 <option value="lecture">Plenum (Reihen)</option>
                 <option value="group">Gruppenarbeit</option>
                 <option value="circle">Stuhlkreis</option>
@@ -1369,28 +1370,36 @@
         </div>
 
         <div class="panel" id="panel-personas" style="display:none; border-color: rgba(16, 185, 129, 0.4);">
-          <div class="panel-header" onclick="togglePanel(this)" style="color: #10b981;">Schüler-Personas</div>
+          <div class="panel-header" onclick="togglePanel(this)" style="color: #10b981;">Lernenden-Personas</div>
           <div class="panel-content">
             <p style="font-size: 11px; color: #9ca3af; margin-top: 0; margin-bottom: 15px; line-height: 1.4;">
-                Platzieren Sie vordefinierte Schüler-Personas im Raum. Jede Persona repräsentiert spezifische Bedürfnisse und Barrieren, die Sie in Ihren Szenario-Regeln abfragen können.
+                Platzieren Sie vordefinierte Lernenden-Personas im Raum. Jede Persona repräsentiert spezifische Bedürfnisse und Barrieren, die Sie in Ihren Szenario-Regeln abfragen können.
             </p>
             <label style="color:#6b7280; font-size:10px; font-weight:700; display:block; margin-bottom:8px; letter-spacing:0.5px;">PERSONA PLATZIEREN</label>
             <div style="display: flex; flex-direction: column; gap: 8px;">
               <button onclick="app.addFurniture('persona_mia')" style="text-align: left; padding: 10px; height: auto; display: flex; flex-direction: column; gap: 4px;">
-                <span style="font-weight: bold; color: #60a5fa;">♿ Mia (Rollstuhl)</span>
+                <span style="font-weight: bold; color: #60a5fa;">Mia (Rollstuhl)</span>
                 <span style="font-size: 10px; color: #9ca3af; white-space: normal;">Benötigt 90cm breite Flucht- und Bewegungswege.</span>
               </button>
               <button onclick="app.addFurniture('persona_ben')" style="text-align: left; padding: 10px; height: auto; display: flex; flex-direction: column; gap: 4px;">
-                <span style="font-weight: bold; color: #fbbf24;">🧠 Ben (ADHS)</span>
+                <span style="font-weight: bold; color: #fbbf24;">Ben (ADHS)</span>
                 <span style="font-size: 10px; color: #9ca3af; white-space: normal;">Braucht reizarme Zonen (Sichtschutz) für konzentriertes Arbeiten.</span>
               </button>
               <button onclick="app.addFurniture('persona_lukas')" style="text-align: left; padding: 10px; height: auto; display: flex; flex-direction: column; gap: 4px;">
-                <span style="font-weight: bold; color: #34d399;">👂 Lukas (Hörschädigung)</span>
+                <span style="font-weight: bold; color: #34d399;">Lukas (Hörschädigung)</span>
                 <span style="font-size: 10px; color: #9ca3af; white-space: normal;">Muss die Lehrkraft/Tafel jederzeit gut sehen können (Lippenlesen).</span>
               </button>
               <button onclick="app.addFurniture('persona_tim')" style="text-align: left; padding: 10px; height: auto; display: flex; flex-direction: column; gap: 4px;">
-                <span style="font-weight: bold; color: #a78bfa;">👁️ Tim (Visus 30%)</span>
+                <span style="font-weight: bold; color: #a78bfa;">Tim (Visus 30%)</span>
                 <span style="font-size: 10px; color: #9ca3af; white-space: normal;">Darf maximal 2,5m von der Tafel entfernt sitzen.</span>
+              </button>
+              <button onclick="app.addFurniture('persona_emma')" style="text-align: left; padding: 10px; height: auto; display: flex; flex-direction: column; gap: 4px;">
+                <span style="font-weight: bold; color: #ec4899;">Emma (Regulär)</span>
+                <span style="font-size: 10px; color: #9ca3af; white-space: normal;">Lernende ohne sichtbare Einschränkung.</span>
+              </button>
+              <button onclick="app.addFurniture('persona_leon')" style="text-align: left; padding: 10px; height: auto; display: flex; flex-direction: column; gap: 4px;">
+                <span style="font-weight: bold; color: #14b8a6;">Leon (Regulär)</span>
+                <span style="font-size: 10px; color: #9ca3af; white-space: normal;">Lernender ohne sichtbare Einschränkung.</span>
               </button>
             </div>
           </div>
@@ -1516,7 +1525,8 @@
             <div class="input-group">
                 <label style="color:#10b981;">Neue Regel/Aufgabe hinzufügen</label>
                 <select id="scenario-task-type" style="margin-bottom: 8px;">
-                    <option value="mc">Multiple Choice Frage</option>
+                    <option value="" disabled selected hidden>Bitte auswählen...</option>
+                    <option value="mc">Multiple Choice Frage (SC/MC)</option>
                     <option value="dist">Abstands- / Fluchtweg-Regel</option>
                     <option value="persona">Spezifische Persona-Regel</option>
                     <option value="inclusive">Inklusive Raumeinrichtung (Auto-Check)</option>
