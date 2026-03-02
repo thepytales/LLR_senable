@@ -1487,17 +1487,106 @@ window.app.toggleChatbot = function() {
 
 window.app.speakText = function(textToSpeak) {
     if ('speechSynthesis' in window) {
-        // Falls gerade noch etwas vorgelesen wird, abbrechen
         window.speechSynthesis.cancel();
-        
-        // Neues Sprachobjekt erzeugen
         const utterance = new SpeechSynthesisUtterance(textToSpeak.trim());
-        utterance.lang = 'de-DE'; // Deutsche Stimme
-        utterance.rate = 1.0; // Normale Geschwindigkeit
-        
+        utterance.lang = 'de-DE';
+        utterance.rate = 1.0;
         window.speechSynthesis.speak(utterance);
     } else {
         alert("Ihr Browser unterstützt die Vorlesefunktion leider nicht.");
+    }
+};
+
+window.app.startSpeechRecognition = function(btnElement) {
+    // 1. DSGVO Check: Wurde schon zugestimmt?
+    if (localStorage.getItem('elmeks_speech_consent') === 'true') {
+        window.app.executeSpeechRecognition(btnElement);
+        return;
+    }
+    
+    // Wenn nicht: Unser eigenes, hübsches Pop-Up anzeigen
+    const consentModal = document.getElementById('speech-consent-modal');
+    if(consentModal) {
+        consentModal.style.display = 'flex';
+    }
+};
+
+window.app.acceptSpeechConsent = function() {
+    // Zustimmung lokal im Browser speichern
+    localStorage.setItem('elmeks_speech_consent', 'true');
+    
+    // Modal schließen
+    const consentModal = document.getElementById('speech-consent-modal');
+    if(consentModal) consentModal.style.display = 'none';
+    
+    // Nach Zustimmung direkt die Aufnahme starten
+    const micBtn = document.querySelector('[title="Spracheingabe (Diktieren)"]');
+    if(micBtn) {
+        window.app.executeSpeechRecognition(micBtn);
+    }
+};
+
+window.app.declineSpeechConsent = function() {
+    // Einfach nur das Modal schließen, nichts weiter tun
+    const consentModal = document.getElementById('speech-consent-modal');
+    if(consentModal) consentModal.style.display = 'none';
+};
+
+window.app.executeSpeechRecognition = function(btnElement) {
+    // 2. Prüfen, ob der Browser Web Speech API unterstützt
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        const errorModal = document.getElementById('speech-error-modal');
+        if (errorModal) {
+            errorModal.style.display = 'flex';
+        }
+        return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'de-DE'; // Deutsche Spracherkennung
+    recognition.interimResults = false; 
+    recognition.maxAlternatives = 1;
+
+    // 3. UI Feedback: Button rot färben während der Aufnahme
+    btnElement.dataset.recording = "true";
+    btnElement.style.background = "rgba(239, 68, 68, 0.2)"; 
+    btnElement.style.borderColor = "rgba(239, 68, 68, 0.5)";
+    btnElement.style.color = "#ef4444";
+    
+    // Platzhalter im Textfeld ändern
+    const input = document.getElementById('chat-input');
+    const oldPlaceholder = input ? input.placeholder : "";
+    if(input) input.placeholder = "Ich höre zu... (Sprechen Sie jetzt)";
+
+    recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        if (input) {
+            input.value = transcript; 
+        }
+    };
+
+    recognition.onerror = function(event) {
+        console.warn("Spracherkennung Fehler:", event.error);
+        if(event.error === 'not-allowed') {
+            alert("Sie haben dem Browser den Zugriff auf das Mikrofon verweigert. Bitte überprüfen Sie die Einstellungen in der Adresszeile (Schloss-Symbol).");
+        }
+    };
+
+    recognition.onend = function() {
+        // UI Feedback: Button wieder zurücksetzen
+        btnElement.dataset.recording = "false";
+        btnElement.style.background = "rgba(255,255,255,0.05)";
+        btnElement.style.borderColor = "rgba(255,255,255,0.1)";
+        btnElement.style.color = "#9ca3af";
+        if(input) input.placeholder = oldPlaceholder;
+    };
+
+    // 4. Aufnahme starten
+    try {
+        recognition.start();
+    } catch(e) {
+        console.error("Mikrofon konnte nicht gestartet werden:", e);
     }
 };
 

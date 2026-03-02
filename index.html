@@ -1152,6 +1152,48 @@
       </div>
     </div>
 
+    <div id="speech-consent-modal" style="position: absolute; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); z-index: 20000; display: none; align-items: center; justify-content: center; pointer-events: auto;">
+        <div class="pwa-glass-box" style="width: 500px; max-width: 90vw; background: #1e1e24; border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); overflow: hidden;">
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 12px;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: #3b82f6; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                </div>
+                <h3 style="margin: 0; color: white; font-size: 18px;">Datenschutz-Hinweis</h3>
+            </div>
+            <div style="padding: 24px; color: #d1d5db; font-size: 14px; line-height: 1.6;">
+                Um Ihre Sprache in Text umzuwandeln, nutzt Ihr Browser eine integrierte Funktion (Web Speech API). Dabei werden Ihre eingesprochenen Audiodaten zur Verarbeitung an die Server Ihres Browser-Anbieters (z. B. Google, Apple, Microsoft) übertragen.<br><br>
+                <strong style="color: white;">Wichtig:</strong> Wir (ELMeKS) speichern oder verarbeiten Ihre Audiodaten <b>nicht</b>.<br><br>
+                Möchten Sie diese Funktion aktivieren und der Datenübertragung an Ihren Browser-Anbieter zustimmen?
+            </div>
+            <div style="padding: 16px 24px; background: rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: flex-end; gap: 12px;">
+                <button onclick="app.declineSpeechConsent()" style="padding: 10px 16px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">Abbrechen</button>
+                <button onclick="app.acceptSpeechConsent()" style="padding: 10px 16px; border-radius: 8px; background: #3b82f6; border: none; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(59,130,246,0.3); transition: background 0.2s;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    Zustimmen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="speech-error-modal" style="position: absolute; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); z-index: 20000; display: none; align-items: center; justify-content: center; pointer-events: auto;">
+        <div class="pwa-glass-box" style="width: 500px; max-width: 90vw; background: #1e1e24; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); overflow: hidden;">
+            <div style="background: rgba(239, 68, 68, 0.1); padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 12px;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: #ef4444; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                </div>
+                <h3 style="margin: 0; color: white; font-size: 18px;">Nicht unterstützt</h3>
+            </div>
+            <div style="padding: 24px; color: #d1d5db; font-size: 14px; line-height: 1.6;">
+                Ihr Browser unterstützt die Spracheingabe leider nicht. Bitte nutzen Sie <b>Google Chrome</b>, <b>Safari</b> oder <b>Microsoft Edge</b>.
+            </div>
+            <div style="padding: 16px 24px; background: rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: flex-end;">
+                <button onclick="document.getElementById('speech-error-modal').style.display = 'none'" style="padding: 10px 24px; border-radius: 8px; background: #3b82f6; border: none; color: white; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(59,130,246,0.3); transition: background 0.2s;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="chatbot-modal" style="position: absolute; inset: 0; background: rgba(15, 16, 18, 0.85); backdrop-filter: blur(10px); z-index: 10000; display: none; align-items: center; justify-content: center; pointer-events: auto;">
       <div class="pwa-glass-box" style="width: 850px; max-width: 95vw; height: 85vh; max-height: 800px; display: flex; flex-direction: column; background: #1e1e24; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
           <div class="pwa-header" style="padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); border-radius: 16px 16px 0 0;">
@@ -1183,6 +1225,11 @@
           <div style="padding: 20px 24px; border-top: 1px solid rgba(255, 255, 255, 0.05); background: rgba(0,0,0,0.2); border-radius: 0 0 16px 16px;">
               <div style="display: flex; gap: 12px; position: relative;">
                   <input type="text" id="chat-input" placeholder="Stellen Sie Ihre Frage hier (z.B. 'Wie exportiere ich als PDF?' oder 'Was ist CVI?')..." style="flex-grow: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 16px 20px; border-radius: 12px; font-size: 15px; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='rgba(59,130,246,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'" onkeypress="if(event.key === 'Enter') app.sendChatMessage()">
+                  
+                  <button onclick="if(window.app && window.app.startSpeechRecognition) window.app.startSpeechRecognition(this)" style="padding: 0 16px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #9ca3af; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="if(this.dataset.recording !== 'true') { this.style.background='rgba(255,255,255,0.1)'; this.style.color='#fff'; }" onmouseout="if(this.dataset.recording !== 'true') { this.style.background='rgba(255,255,255,0.05)'; this.style.color='#9ca3af'; }" title="Spracheingabe (Diktieren)">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                  </button>
+
                   <button class="primary" style="padding: 0 28px; border-radius: 12px; background: #3b82f6; border: none; color: white; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); transition: transform 0.1s, background 0.2s;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'" onclick="app.sendChatMessage()">
                       Senden
                       <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
