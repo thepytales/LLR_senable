@@ -1750,11 +1750,7 @@ window.app.updateSettings = function() {
 
     if(!isFirstPersonActive()) {
         controls.rotateSpeed = settings.mouseSensitivity;
-        
-        // --- FIX FÜR FIREFOX MAUSRAD-BUG (Smooth Scrolling Spam) ---
-        const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
-        controls.zoomSpeed = isFirefox ? (settings.mouseSensitivity * 0.15) : settings.mouseSensitivity;
-        
+        controls.zoomSpeed = settings.mouseSensitivity;
         controls.enableDamping = !settings.reducedMotion;
     }
     
