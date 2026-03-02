@@ -1,4 +1,4 @@
-const CACHE_NAME = 'elmeks-cache-v8'; // Version hochgezählt
+const CACHE_NAME = 'elmeks-cache-v9'; // Version hochgezählt
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

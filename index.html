@@ -1152,7 +1152,46 @@
       </div>
     </div>
 
-    <!-- === PROFESSIONELLER HOMESCREEN (REDESIGN 16:9) === -->
+    <div id="chatbot-modal" style="position: absolute; inset: 0; background: rgba(15, 16, 18, 0.85); backdrop-filter: blur(10px); z-index: 10000; display: none; align-items: center; justify-content: center; pointer-events: auto;">
+      <div class="pwa-glass-box" style="width: 850px; max-width: 95vw; height: 85vh; max-height: 800px; display: flex; flex-direction: column; background: #1e1e24; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
+          <div class="pwa-header" style="padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); border-radius: 16px 16px 0 0;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #2563eb); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  </div>
+                  <div>
+                      <h2 style="margin: 0; font-size: 18px; font-weight: 600; color: #f3f4f6;">Automatisierter Assistent</h2>
+                      <span style="font-size: 12px; color: #10b981; display: flex; align-items: center; gap: 4px;"><span style="display:inline-block; width:6px; height:6px; background:#10b981; border-radius:50%;"></span>Online</span>
+                  </div>
+              </div>
+              <button onclick="document.getElementById('chatbot-modal').style.display = 'none'" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #9ca3af; width: 36px; height: 36px; border-radius: 8px; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'; this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.color='#9ca3af'">✕</button>
+          </div>
+          <div class="pwa-content" id="chat-history" style="flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 24px; padding: 24px; scroll-behavior: smooth;">
+              <div style="display: flex; gap: 12px; max-width: 85%;">
+                  <div style="width: 36px; height: 36px; border-radius: 50%; background: #2563eb; flex-shrink: 0; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(37, 99, 235, 0.2);"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+                  <div style="background: rgba(40, 41, 46, 0.8); padding: 16px 20px; border-radius: 4px 16px 16px 16px; color: #e5e7eb; border: 1px solid rgba(255,255,255,0.05); font-size: 14px; line-height: 1.6; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                      <div class="chat-text-content">Willkommen im Assistenz-System. Ich unterstütze Sie bei allen Fragen rund um die Steuerung, den Editor, Barrierefreiheit, Dateien (.elmeks) oder PDF-Exporte. Wie kann ich Ihnen heute weiterhelfen?</div>
+                      <div style="margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px;">
+                          <button onclick="if(window.app && window.app.speakText) window.app.speakText(this.parentElement.previousElementSibling.innerText)" style="display: flex; align-items: center; gap: 6px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color: #60a5fa; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(59, 130, 246, 0.2)'; this.style.color='#fff'" onmouseout="this.style.background='rgba(59, 130, 246, 0.1)'; this.style.color='#60a5fa'">
+                              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                              Antwort vorlesen
+                          </button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          <div style="padding: 20px 24px; border-top: 1px solid rgba(255, 255, 255, 0.05); background: rgba(0,0,0,0.2); border-radius: 0 0 16px 16px;">
+              <div style="display: flex; gap: 12px; position: relative;">
+                  <input type="text" id="chat-input" placeholder="Stellen Sie Ihre Frage hier (z.B. 'Wie exportiere ich als PDF?' oder 'Was ist CVI?')..." style="flex-grow: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 16px 20px; border-radius: 12px; font-size: 15px; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='rgba(59,130,246,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'" onkeypress="if(event.key === 'Enter') app.sendChatMessage()">
+                  <button class="primary" style="padding: 0 28px; border-radius: 12px; background: #3b82f6; border: none; color: white; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); transition: transform 0.1s, background 0.2s;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'" onclick="app.sendChatMessage()">
+                      Senden
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                  </button>
+              </div>
+          </div>
+      </div>
+    </div>
+
     <div id="homescreen">
       <!-- Hintergrund Animation & Raster -->
       <canvas id="bg-canvas"></canvas>
@@ -1163,7 +1202,7 @@
         <div class="home-left stagger-1">
             <div style="margin-bottom: 40px;">
                 <div class="home-title-large">SensAble</div>
-                <div class="home-subtitle" style="font-size: 14px; margin-bottom: 0;">Die interaktive Lösung für inklusive Raumplanung.<br><br>Diese Webanwendung ist Teil des Projekts ELMeKS.digital.</div>
+                <div class="home-subtitle" style="font-size: 14px; margin-bottom: 0;">Interaktive Lösung für inklusive Raumplanung<br><br>Diese Webanwendung ist Teil des Projekts ELMeKS.digital.</div>
             </div>
             
             <div class="section-label" style="margin-bottom: 15px;">PLANUNGSMODUS</div>
@@ -1255,6 +1294,13 @@
                         <label class="switch"><input type="checkbox" id="start-read-aloud" onchange="app.updateSettings()"><span class="slider"></span></label>
                     </div>
                 </div>
+            </div>
+
+            <div class="chatbot-teaser stagger-4" style="margin-top: 25px; margin-bottom: 20px;">
+                <button class="big-btn ghost" onclick="app.toggleChatbot()" style="width: 100%; justify-content: center; background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3); color: #9ca3af;">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <span style="font-size: 13px; letter-spacing: 0.5px;">OFFENE FRAGEN? JETZT CHAT STARTEN.</span>
+                </button>
             </div>
 
             <div class="feedback-area" style="border-color: rgba(255,255,255,0.05);">
@@ -1394,11 +1440,11 @@
                 <span style="font-size: 10px; color: #9ca3af; white-space: normal;">Darf maximal 2,5m von der Tafel entfernt sitzen.</span>
               </button>
               <button onclick="app.addFurniture('persona_emma')" style="text-align: left; padding: 10px; height: auto; display: flex; flex-direction: column; gap: 4px;">
-                <span style="font-weight: bold; color: #ec4899;">Emma (Regulär)</span>
+                <span style="font-weight: bold; color: #ec4899;">Emma</span>
                 <span style="font-size: 10px; color: #9ca3af; white-space: normal;">Lernende ohne sichtbare Einschränkung.</span>
               </button>
               <button onclick="app.addFurniture('persona_leon')" style="text-align: left; padding: 10px; height: auto; display: flex; flex-direction: column; gap: 4px;">
-                <span style="font-weight: bold; color: #14b8a6;">Leon (Regulär)</span>
+                <span style="font-weight: bold; color: #14b8a6;">Leon</span>
                 <span style="font-size: 10px; color: #9ca3af; white-space: normal;">Lernender ohne sichtbare Einschränkung.</span>
               </button>
             </div>
@@ -1506,8 +1552,8 @@
       <div class="sidebar-right">
         
         <!-- Editor Panel (Nur im Szenario Editor sichtbar) -->
-        <div class="panel" id="panel-scenario-builder" style="display:none; border-color: rgba(16, 185, 129, 0.4);">
-          <div class="panel-header" onclick="togglePanel(this)" style="color: #10b981;">Regeln & Aufgaben</div>
+        <div class="panel" id="panel-scenario-details" style="display:none; border-color: rgba(16, 185, 129, 0.4);">
+          <div class="panel-header" onclick="togglePanel(this)" style="color: #10b981;">Szenario-Details</div>
           <div class="panel-content">
             
             <div class="input-group">
@@ -1515,32 +1561,88 @@
                 <input type="text" id="scenario-title" placeholder="z.B. Klausur inklusiv" onchange="app.scenarioData.title = this.value">
             </div>
             
-            <div class="input-group">
+            <div class="input-group" style="margin-bottom: 0;">
                 <label>Beschreibung / Aufgabe</label>
-                <textarea id="scenario-desc" rows="3" placeholder="Beschreiben Sie die Ausgangslage..." onchange="app.scenarioData.desc = this.value"></textarea>
+                <textarea id="scenario-desc" rows="4" placeholder="Beschreiben Sie die Ausgangslage..." onchange="app.scenarioData.desc = this.value"></textarea>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="panel collapsed" id="panel-scenario-rules" style="display:none; border-color: rgba(16, 185, 129, 0.4);">
+          <div class="panel-header" onclick="togglePanel(this)" style="color: #10b981;">Regeln & Werkzeuge</div>
+          <div class="panel-content">
+
+            <label style="color:#10b981; font-size: 10px; text-transform: uppercase; font-weight: 700; margin-bottom: 8px; display: block;">Neue Aufgabe hinzufügen</label>
+
+            <div style="display:flex; flex-direction:column; gap:8px; margin-bottom: 15px;">
+                
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px;">
+                    <button class="ghost" style="width:100%; text-align:left; padding: 8px; font-size:12px; border:none; background:rgba(255,255,255,0.02); border-radius: 4px;" onclick="app.openTaskBuilder('mc')">
+                        <strong style="color:#f3f4f6; display:block; margin-bottom:3px;">Wissensfrage (SC/MC)</strong>
+                        <span style="color:#9ca3af; font-size:10px; white-space:normal; line-height:1.3; display:block;">Prüft das theoretische Wissen zur Raumsituation per Multiple Choice.</span>
+                    </button>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px;">
+                    <button class="ghost" style="width:100%; text-align:left; padding: 8px; font-size:12px; border:none; background:rgba(255,255,255,0.02); margin-bottom:4px; border-radius: 4px;" onclick="app.openTaskBuilder('dist')">
+                        <strong style="color:#f3f4f6; display:block; margin-bottom:3px;">Abstandsregel</strong>
+                        <span style="color:#9ca3af; font-size:10px; white-space:normal; line-height:1.3; display:block;">Definiert Mindestabstände zwischen Objekten (z.B. für Fluchtwege).</span>
+                    </button>
+                    <button class="ghost" style="width:100%; text-align:left; padding: 8px; font-size:12px; border:none; background:rgba(255,255,255,0.02); border-radius: 4px;" onclick="app.openTaskBuilder('capacity')">
+                        <strong style="color:#f3f4f6; display:block; margin-bottom:3px;">Sitzplätze</strong>
+                        <span style="color:#9ca3af; font-size:10px; white-space:normal; line-height:1.3; display:block;">Gibt eine Minimalanzahl an verfügbaren Sitzplätzen im Raum vor.</span>
+                    </button>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px;">
+                    <button class="ghost" style="width:100%; text-align:left; padding: 8px; font-size:12px; border:none; background:rgba(255,255,255,0.02); margin-bottom:4px; border-radius: 4px;" onclick="app.openTaskBuilder('persona')">
+                        <strong style="color:#f3f4f6; display:block; margin-bottom:3px;">Persona-Bedürfnis</strong>
+                        <span style="color:#9ca3af; font-size:10px; white-space:normal; line-height:1.3; display:block;">Fordert die korrekte Platzierung einer spezifischen Person.</span>
+                    </button>
+                    <button class="ghost" style="width:100%; text-align:left; padding: 8px; font-size:12px; border:none; background:rgba(255,255,255,0.02); margin-bottom:4px; border-radius: 4px;" onclick="app.openTaskBuilder('acoustic_budget')">
+                        <strong style="color:#f3f4f6; display:block; margin-bottom:3px;">Akustik-Ziel</strong>
+                        <span style="color:#9ca3af; font-size:10px; white-space:normal; line-height:1.3; display:block;">Fordert eine Mindestanzahl an schallabsorbierenden Möbeln.</span>
+                    </button>
+                    <button class="ghost" style="width:100%; text-align:left; padding: 8px; font-size:12px; border:none; background:rgba(255,255,255,0.02); border-radius: 4px;" onclick="app.openTaskBuilder('inclusive')">
+                        <strong style="color:#f3f4f6; display:block; margin-bottom:3px;">Auto-Check: Inklusion</strong>
+                        <span style="color:#9ca3af; font-size:10px; white-space:normal; line-height:1.3; display:block;">Prüft automatisch auf ausreichend Fluchtwege und Raumakustik.</span>
+                    </button>
+                </div>
+            </div>
+
+            <label style="color:#10b981; font-size: 10px; text-transform: uppercase; font-weight: 700; margin-bottom: 8px; display: block;">Aktive Aufgaben</label>
+            <div id="scenario-tasks-list" style="display:flex; flex-direction:column; gap:8px;">
+                <small style="color:#6b7280;">Noch keine Aufgaben definiert.</small>
             </div>
 
             <hr style="border-color: rgba(255,255,255,0.05); margin: 15px 0;">
-
-            <div class="input-group">
-                <label style="color:#10b981;">Neue Regel/Aufgabe hinzufügen</label>
-                <select id="scenario-task-type" style="margin-bottom: 8px;">
-                    <option value="" disabled selected hidden>Bitte auswählen...</option>
-                    <option value="mc">Multiple Choice Frage (SC/MC)</option>
-                    <option value="dist">Abstands- / Fluchtweg-Regel</option>
-                    <option value="persona">Spezifische Persona-Regel</option>
-                    <option value="inclusive">Inklusive Raumeinrichtung (Auto-Check)</option>
-                </select>
-                <button class="primary" style="width:100%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-color: #10b981;" onclick="app.openTaskBuilder()">+ Hinzufügen</button>
+            
+            <div class="input-group" style="margin-bottom: 0;">
+                <label style="color:#10b981; font-size: 10px; text-transform: uppercase; font-weight: 700;">Spezial-Modi (Hotspots & Fehler)</label>
+                <div class="setting-row" style="padding-bottom: 5px; border: none; margin-bottom: 5px; padding-top: 5px;">
+                    <div>
+                        <span style="color:#d1d5db; font-size:12px; font-weight:600;">Info-Karten anhängen</span>
+                        <div style="font-size:10px; color:#9ca3af; line-height: 1.2;">Möbel mit erklärenden Texten versehen.</div>
+                    </div>
+                    <label class="switch"><input type="checkbox" id="toggle-info-mode" onchange="app.toggleEditorModes()"><span class="slider"></span></label>
+                </div>
+                <div class="setting-row" style="padding-bottom: 5px; border: none; margin-bottom: 5px;">
+                    <div>
+                        <span style="color:#d1d5db; font-size:12px; font-weight:600;">Fehlersuche aktivieren</span>
+                        <div style="font-size:10px; color:#9ca3af; line-height: 1.2;">Möbel als zu suchende Barriere markieren.</div>
+                    </div>
+                    <label class="switch"><input type="checkbox" id="toggle-error-mode" onchange="app.toggleEditorModes()"><span class="slider"></span></label>
+                </div>
             </div>
 
-            <div id="scenario-tasks-list" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; display:flex; flex-direction:column; gap:8px;">
-                <small style="color:#6b7280;">Noch keine Regeln definiert.</small>
-            </div>
+            <div id="editor-object-list" style="display:none; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; flex-direction:column; gap:6px; max-height: 250px; overflow-y: auto;">
+                </div>
+
             <hr style="border-color: rgba(255,255,255,0.05); margin: 15px 0;">
             <label style="color:#10b981; font-size: 10px; text-transform: uppercase; font-weight: 700; margin-bottom: 4px; display: block;">Erlaubte Werkzeuge im Spiel</label>
-            <p style="font-size: 11px; color: #9ca3af; margin-top: 0; margin-bottom: 10px; line-height: 1.4;">Wählen Sie, welche Möbel der Spieler aus dem Inventar hinzufügen darf, um das Problem zu lösen.</p>
-            <button class="ghost" style="width:100%; border-color: rgba(255,255,255,0.2); font-size: 12px;" onclick="app.openToolConfigModal()">Werkzeuge konfigurieren</button>
+            <p style="font-size: 11px; color: #9ca3af; margin-top: 0; margin-bottom: 10px; line-height: 1.4;">Wählen Sie, welche Möbel der Spielende aus dem Inventar hinzufügen darf, um das Problem zu lösen.</p>
+            <button class="ghost" style="width:100%; border-color: rgba(255,255,255,0.2); font-size: 12px; padding: 10px;" onclick="app.openToolConfigModal()">Werkzeuge konfigurieren</button>
             <div id="allowed-tools-preview" style="font-size: 11px; color: #9ca3af; margin-top: 6px; text-align: center;">Standardmäßig sind keine Werkzeuge erlaubt.</div>
 
           </div>
