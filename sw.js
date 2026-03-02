@@ -1,4 +1,4 @@
-const CACHE_NAME = 'elmeks-cache-v9'; // Version hochgezählt
+const CACHE_NAME = 'elmeks-cache-v14'; 
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -6,9 +6,16 @@ const ASSETS_TO_CACHE = [
   './js/modules/ui.js',
   './js/modules/avatar.js',
   './manifest.json',
-  'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap',
-  'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js'
+  './lib/jspdf.umd.min.js',
+  './lib/jspdf.plugin.autotable.min.js',
+  './lib/three/three.module.js',
+  './lib/three/OrbitControls.js',
+  './lib/three/GLTFLoader.js',
+  './lib/three/OBJLoader.js',
+  './lib/three/DRACOLoader.js',
+  './lib/utils/BufferGeometryUtils.js',
+  './fonts/Inter-Regular.woff2'
+  './fonts/Inter-Bold.woff2'
 ];
 
 // 1. Installieren: Sofort Cache füllen & Aktivierung erzwingen

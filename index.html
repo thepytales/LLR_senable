@@ -7,10 +7,39 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#3b82f6">
     <link rel="apple-touch-icon" href="logo/icon-192.png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- PDF Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+    <style>
+      @font-face {
+        font-family: 'Inter';
+        src: url('./fonts/Inter-Regular.woff2') format('woff2');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Inter';
+        src: url('./fonts/Inter-Bold.woff2') format('woff2');
+        font-weight: 700; /* 700 steht in CSS für Bold */
+        font-style: normal;
+        font-display: swap;
+      }
+      body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      }
+    </style>
+    <script src="lib/jspdf.umd.min.js"></script>
+    <script src="lib/jspdf.plugin.autotable.min.js"></script>
+    
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "./lib/three/three.module.js",
+          "OrbitControls": "./lib/three/OrbitControls.js",
+          "GLTFLoader": "./lib/three/GLTFLoader.js",
+          "OBJLoader": "./lib/three/OBJLoader.js",
+          "DRACOLoader": "./lib/three/DRACOLoader.js"
+        }
+      }
+    </script>
     
     <script>
       function togglePanel(header) {
@@ -185,14 +214,16 @@
       /* Animierter Gradient Titel */
       /* Animierter Gradient Titel */
       .home-title-large {
-          font-size: 3.5em; font-weight: 800; color: white;
-          /* FIX: Line-height erhöht und Padding unten hinzugefügt für das 'g' */
+          font-size: 4em; /* Noch ein kleines Stück größer */
+          font-weight: 700; /* Nutzt jetzt unsere neue Inter-Bold Schriftart */
+          color: white;
           line-height: 1.2; 
           padding-bottom: 10px;
           margin: 0 0 5px 0; 
-          letter-spacing: -1.5px; 
+          letter-spacing: -2px; /* Etwas enger zusammen, sieht moderner aus */
           
-          background: linear-gradient(90deg, #ffffff 0%, #a5c9ff 50%, #ffffff 100%);
+          /* Knackigerer Blau-Weiß-Verlauf */
+          background: linear-gradient(90deg, #ffffff 0%, #60a5fa 50%, #ffffff 100%);
           background-size: 200% auto;
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
@@ -1295,14 +1326,39 @@
             </div>
         </div>
 
-        <div class="home-right stagger-3">
+        <div class="home-right stagger-3" style="display: flex; flex-direction: column; gap: 28px;">
             
-            <button onclick="document.getElementById('pwa-modal').classList.add('active')" class="big-btn ghost" style="justify-content: center; background: transparent; border: 1px solid rgba(59, 130, 246, 0.3); color: white;">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                <span style="font-size: 13px; letter-spacing: 0.5px;">ANWENDUNG HERUNTERLADEN</span>
-            </button>
-            
-            <div class="feature-box" style="margin-bottom: 0;">
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <button onclick="document.getElementById('pwa-modal').classList.add('active')" class="big-btn ghost" style="justify-content: center; background: transparent; border: 1px solid rgba(59, 130, 246, 0.3); color: white;">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    <span style="font-size: 13px; letter-spacing: 0.5px;">ANWENDUNG HERUNTERLADEN</span>
+                </button>
+
+                <button onclick="app.toggleChatbot()" class="big-btn ghost" style="justify-content: center; background: transparent; border: 1px solid rgba(16, 185, 129, 0.3); color: white;">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <span style="font-size: 13px; letter-spacing: 0.5px;">OFFENE FRAGEN? CHAT STARTEN</span>
+                </button>
+            </div>
+
+            <div class="feature-box" style="margin: 0;">
+                <div class="section-label">Barrierefreiheit & Anzeige</div>
+                <div class="settings-mini" style="background: transparent; padding: 0; border: none;">
+                    <div class="mini-row" style="margin-bottom: 12px;">
+                        <span style="color:#d1d5db;">Hochkontrast-Modus</span>
+                        <label class="switch"><input type="checkbox" id="start-high-contrast" onchange="app.updateSettings()"><span class="slider"></span></label>
+                    </div>
+                    <div class="mini-row" style="margin-bottom: 12px;">
+                        <span style="color:#d1d5db;">Vorlesemodus (Hover)</span>
+                        <label class="switch"><input type="checkbox" id="start-read-aloud" onchange="app.updateSettings()"><span class="slider"></span></label>
+                    </div>
+                    <div class="mini-row" style="margin: 0;">
+                        <span style="color:#d1d5db;">Vollbildmodus</span>
+                        <label class="switch"><input type="checkbox" id="start-fullscreen" onchange="app.toggleFullscreen()"><span class="slider"></span></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feature-box stagger-4" style="margin: 0;">
                 <div class="section-label">Steuerung & Shortcuts</div>
                 <ul class="feature-list">
                     <li class="feature-item">
@@ -1315,8 +1371,15 @@
                     <li class="feature-item">
                         <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></div>
                         <div>
-                            <strong>Kamera / Objekt drehen</strong>
-                            <span style="color:#9ca3af;">Rechte Maustaste (Kamera) oder Taste <span class="key-badge">R</span> (Objekt).</span>
+                            <strong>Ansicht & Rotation</strong>
+                            <span style="color:#9ca3af;">Rechtsklick für Kamera. Taste <span class="key-badge">R</span> für Objekte.</span>
+                        </div>
+                    </li>
+                    <li class="feature-item">
+                        <div class="icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+                        <div>
+                            <strong>Kamera-Zoom</strong>
+                            <span style="color:#9ca3af;">Mausrad drehen oder Touchpad-Pinch.</span>
                         </div>
                     </li>
                     <li class="feature-item">
@@ -1329,30 +1392,14 @@
                 </ul>
             </div>
 
-            <div class="feature-box stagger-4" style="margin-bottom: 0;">
-                <div class="section-label">Barrierefreiheit</div>
-                <div class="settings-mini" style="background: transparent; padding: 0; border: none;">
-                    <div class="mini-row" style="margin-bottom:12px;">
-                        <span style="color:#d1d5db;">Hochkontrast-Modus</span>
-                        <label class="switch"><input type="checkbox" id="start-high-contrast" onchange="app.updateSettings()"><span class="slider"></span></label>
-                    </div>
-                    <div class="mini-row" style="margin-bottom:0;">
-                        <span style="color:#d1d5db;">Vorlesemodus (Hover)</span>
-                        <label class="switch"><input type="checkbox" id="start-read-aloud" onchange="app.updateSettings()"><span class="slider"></span></label>
-                    </div>
+            <div class="feedback-area" style="border-top: 1px solid rgba(255,255,255,0.05); margin-top: auto; padding-top: 25px; display: flex; flex-direction: column; align-items: center; gap: 18px;">
+                <div>
+                    <span style="color: #6b7280; font-size: 12px;">Haben Sie Ideen oder Wünsche?</span><br>
+                    <a href="mailto:dominik.toepper@tu-dresden.de" class="feedback-link" style="font-size: 13px; font-weight: 600;">dominik.toepper@tu-dresden.de</a>
                 </div>
-            </div>
-
-            <div class="chatbot-teaser stagger-4" style="margin-top: 25px; margin-bottom: 20px;">
-                <button class="big-btn ghost" onclick="app.toggleChatbot()" style="width: 100%; justify-content: center; background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3); color: #9ca3af;">
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                    <span style="font-size: 13px; letter-spacing: 0.5px;">OFFENE FRAGEN? JETZT CHAT STARTEN.</span>
+                <button onclick="document.getElementById('privacy-modal').style.display = 'flex'" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #9ca3af; padding: 8px 18px; border-radius: 20px; font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; font-family: inherit; font-weight: 600;" onmouseover="this.style.background='rgba(255,255,255,0.08)'; this.style.color='#fff'; this.style.borderColor='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'; this.style.color='#9ca3af'; this.style.borderColor='rgba(255,255,255,0.08)'">
+                    Datenschutz & Impressum
                 </button>
-            </div>
-
-            <div class="feedback-area" style="border-color: rgba(255,255,255,0.05);">
-                Haben Sie Ideen oder Wünsche? <br>
-                <a href="mailto:dominik.toepper@tu-dresden.de" class="feedback-link">dominik.toepper@tu-dresden.de</a>
             </div>
 
         </div>
@@ -1430,7 +1477,11 @@
 
         <div class="spacer"></div>
 
-        <button onclick="app.toggleSettings()" style="margin-left: 10px; padding: 6px 10px;">
+        <button onclick="app.toggleFullscreen()" title="Vollbild umschalten" style="margin-left: 10px; padding: 6px 10px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+        </button>
+
+        <button onclick="app.toggleSettings()" title="Einstellungen" style="margin-left: 10px; padding: 6px 10px;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         </button>
 
@@ -1904,9 +1955,77 @@
             <div class="modal-title" style="color: #10b981;" id="mc-title">Frage</div>
             <p id="mc-question" style="color: white; font-size: 14px; line-height: 1.5; margin-bottom: 20px;"></p>
             <div id="mc-answers" style="display: flex; flex-direction: column; gap: 10px;">
-                <!-- Buttons -->
-            </div>
+                </div>
         </div>
+    </div>
+
+    <div id="privacy-modal" style="position: absolute; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 10000; display: none; align-items: center; justify-content: center; pointer-events: auto;">
+      <div class="pwa-glass-box" style="width: 800px; max-width: 95vw; height: 80vh; max-height: 800px; display: flex; flex-direction: column; background: #18181b; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7);">
+          <div class="pwa-header" style="padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); border-radius: 16px 16px 0 0;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); display: flex; align-items: center; justify-content: center; color: #3b82f6;">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  </div>
+                  <h2 style="margin: 0; font-size: 18px; font-weight: 600; color: #f3f4f6; letter-spacing: 0.5px;">Datenschutz & Impressum</h2>
+              </div>
+              <button onclick="document.getElementById('privacy-modal').style.display = 'none'" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #9ca3af; width: 36px; height: 36px; border-radius: 8px; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'; this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.color='#9ca3af'">✕</button>
+          </div>
+          <div class="pwa-content" style="flex-grow: 1; overflow-y: auto; padding: 30px; color: #d1d5db; line-height: 1.6; font-size: 14px; background: #111113;">
+              
+              <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 25px; margin-bottom: 30px; position: relative; overflow: hidden;">
+                  <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: #3b82f6;"></div>
+                  <h3 style="color: white; margin-top: 0; margin-bottom: 15px; font-size: 16px; letter-spacing: 1px; text-transform: uppercase;">Impressum</h3>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                      <div>
+                          <span style="font-size: 11px; color: #9ca3af; text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 4px;">Verantwortlich</span>
+                          <span style="color: #f3f4f6; font-size: 15px; font-weight: 600;">Dominik Töpper</span>
+                      </div>
+                      <div>
+                          <span style="font-size: 11px; color: #9ca3af; text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 4px;">Kontakt</span>
+                          <a href="mailto:dominik.toepper@tu-dresden.de" style="color: #60a5fa; text-decoration: none; font-size: 14px;">dominik.toepper@tu-dresden.de</a>
+                      </div>
+                      <div style="grid-column: 1 / -1;">
+                          <span style="font-size: 11px; color: #9ca3af; text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 4px;">Institution / Adresse</span>
+                          <span style="color: #d1d5db; font-size: 14px;">TU DRESDEN, Münchner Str. 1, 
+01069 Dresden</span>
+                      </div>
+                  </div>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 20px;">
+                  
+                  <div style="padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                      <h4 style="color: #f3f4f6; margin: 0 0 8px 0; font-size: 15px; display: flex; align-items: center; gap: 8px;">
+                          <span style="color: #10b981;">●</span> Lokale Verarbeitung
+                      </h4>
+                      <p style="margin: 0; color: #9ca3af; font-size: 13px;">Diese Anwendung ist als reine "Client-Side-Only" Applikation konzipiert. Die gesamte Verarbeitung von Planungsdaten findet direkt auf Ihrem Endgerät im Browser statt. Wir erheben, speichern oder verarbeiten keine personenbezogenen Daten von Ihnen.</p>
+                  </div>
+
+                  <div style="padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                      <h4 style="color: #f3f4f6; margin: 0 0 8px 0; font-size: 15px; display: flex; align-items: center; gap: 8px;">
+                          <span style="color: #3b82f6;">●</span> Hosting (GitHub Pages)
+                      </h4>
+                      <p style="margin: 0; color: #9ca3af; font-size: 13px;">Diese Webseite wird über GitHub Pages gehostet. Anbieter ist die GitHub Inc., USA. Wenn Sie diese Webseite aufrufen, erfasst GitHub technisch bedingt Ihre IP-Adresse und weitere Log-Daten. <a href="https://docs.github.com/de/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" style="color: #60a5fa; text-decoration: none; border-bottom: 1px dotted #60a5fa;">Weitere Infos zum Datenschutz bei GitHub</a>.</p>
+                  </div>
+
+                  <div style="padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                      <h4 style="color: #f3f4f6; margin: 0 0 8px 0; font-size: 15px; display: flex; align-items: center; gap: 8px;">
+                          <span style="color: #f59e0b;">●</span> Web Speech API (Spracherkennung)
+                      </h4>
+                      <p style="margin: 0; color: #9ca3af; font-size: 13px;">Wenn Sie die optionale Spracheingabe nutzen, werden Ihre Audiodaten zur Umwandlung in Text an die Server Ihres Browser-Herstellers (z. B. Google, Apple) gesendet. Die Nutzung erfordert Ihre vorherige, ausdrückliche Zustimmung (Opt-in) direkt in der App.</p>
+                  </div>
+
+                  <div>
+                      <h4 style="color: #f3f4f6; margin: 0 0 8px 0; font-size: 15px; display: flex; align-items: center; gap: 8px;">
+                          <span style="color: #8b5cf6;">●</span> Lokaler Speicher (Cache)
+                      </h4>
+                      <p style="margin: 0; color: #9ca3af; font-size: 13px;">Diese App verwendet den "Local Storage" und einen "Service Worker" (Cache) Ihres Browsers ausschließlich für technische Einstellungen und die Offline-Verfügbarkeit der Programm-Dateien. Es werden keine Tracking-Cookies eingesetzt.</p>
+                  </div>
+
+              </div>
+
+          </div>
+      </div>
     </div>
 
     <script type="module" src="script.js"></script>

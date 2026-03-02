@@ -1,8 +1,8 @@
-import * as THREE from "https://esm.sh/three@0.160.0";
-import { OrbitControls } from "https://esm.sh/three@0.160.0/examples/jsm/controls/OrbitControls.js";
-import { GLTFLoader } from "https://esm.sh/three@0.160.0/examples/jsm/loaders/GLTFLoader.js";
-import { OBJLoader } from "https://esm.sh/three@0.160.0/examples/jsm/loaders/OBJLoader.js";
-import { DRACOLoader } from "https://esm.sh/three@0.160.0/examples/jsm/loaders/DRACOLoader.js";
+import * as THREE from "three";
+import { OrbitControls } from "OrbitControls";
+import { GLTFLoader } from "GLTFLoader";
+import { OBJLoader } from "OBJLoader";
+import { DRACOLoader } from "DRACOLoader";
 
 // Eigene Module
 import { initRightSidebar } from "./js/modules/ui.js"; 
@@ -4585,6 +4585,62 @@ window.app.initPlayModeHUD = function() {
         `);
     }
 };
+
+// === FULLSCREEN API ===
+window.app.toggleFullscreen = function() {
+    if (!document.fullscreenElement) {
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen();
+        } else if (document.documentElement.webkitRequestFullscreen) {
+            document.documentElement.webkitRequestFullscreen();
+        } else if (document.documentElement.msRequestFullscreen) {
+            document.documentElement.msRequestFullscreen();
+        }
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        }
+    }
+};
+
+// UI Synchronisation: Falls der Nutzer ESC drückt, muss der Regler umspringen
+document.addEventListener('fullscreenchange', () => {
+    const isFull = !!document.fullscreenElement;
+    const toggleHome = document.getElementById('start-fullscreen');
+    if (toggleHome) toggleHome.checked = isFull;
+});
+
+// === SCREEN WAKE LOCK API (DSGVO-konform) ===
+// Verhindert, dass das Display ausgeht, während die App aktiv genutzt wird.
+window.app.wakeLock = null;
+
+window.app.requestWakeLock = async function() {
+    try {
+        if ('wakeLock' in navigator) {
+            window.app.wakeLock = await navigator.wakeLock.request('screen');
+            console.log('Screen Wake Lock ist aktiv.');
+            
+            window.app.wakeLock.addEventListener('release', () => {
+                console.log('Screen Wake Lock wurde freigegeben.');
+            });
+        }
+    } catch (err) {
+        console.warn('Wake Lock Fehler:', err.name, err.message);
+    }
+};
+
+// Wenn der Tab wieder sichtbar wird (Nutzer kommt zurück), Wake Lock neu anfordern
+document.addEventListener('visibilitychange', () => {
+    if (window.app.wakeLock !== null && document.visibilityState === 'visible') {
+        window.app.requestWakeLock();
+    }
+});
+
+window.app.requestWakeLock();
 
 // === INITIALISIERUNG ===
 init();
