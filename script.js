@@ -11,8 +11,23 @@ import { toggleAvatar, toggleAvatarView, isFirstPersonActive } from "./js/module
 // === 1. Setup & Globale Variablen ===
 window.app = {}; 
 
+// Sicherheits-Funktion (XSS-Schutz)
+window.app.escapeHTML = function(str) {
+    if (!str) return "";
+    return String(str).replace(/[&<>'"]/g, function(tag) {
+        const charsToReplace = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#39;',
+            '"': '&quot;'
+        };
+        return charsToReplace[tag] || tag;
+    });
+};
+
 const GLOBAL_SCALE = 0.6; 
-const FURNITURE_Y_OFFSET = 0.22; // Standardhöhe für Möbel
+const FURNITURE_Y_OFFSET = 0.22; // Standardhöhe für Möbels
 const VISION_LAYER_HEIGHT = 2.2; 
 const TOP_VIEW_HEIGHT = 18; 
 
@@ -448,7 +463,10 @@ window.app.updateZoneListUI = function() {
     
     zones.forEach(zone => {
         const isEditing = (editingZone === zone);
-        const name = zone.userData.zoneName || "Zone";
+        
+        // XSS-SCHUTZ: Name der Zone aus Dateien sicher machen!
+        const name = window.app.escapeHTML(zone.userData.zoneName || "Zone");
+        
         const color = zone.userData.zoneColor !== undefined ? zone.userData.zoneColor : 0x10b981;
         const colorStr = '#' + color.toString(16).padStart(6, '0');
         
@@ -1651,8 +1669,11 @@ window.app.sendChatMessage = function() {
     const history = document.getElementById('chat-history');
     if(!input || !history) return;
     
-    const msg = input.value.trim();
-    if(!msg) return;
+    const rawMsg = input.value.trim();
+    if(!rawMsg) return;
+
+    // XSS-SCHUTZ: Benutzereingabe sicher machen!
+    const msg = window.app.escapeHTML(rawMsg);
 
     // Nachricht des Nutzers anzeigen (Blaues Bubble, rechtsbündig)
     history.innerHTML += `
@@ -3471,12 +3492,14 @@ window.app.updateEditorObjectList = function() {
         `;
         
         if (infoMode) {
-            // UI sperren, wenn das Objekt ein Fehler ist
+            // XSS-SCHUTZ: Info-Text escapen!
+            const safeInfoText = window.app.escapeHTML(obj.userData.infoText || '');
+            
             const opacity = isError ? "0.4" : "1";
             const disabled = isError ? "disabled" : "";
             html += `
                 <div style="display:flex; gap:6px; align-items:center; opacity: ${opacity};">
-                    <input type="text" placeholder="${isError ? 'Deaktiviert (Möbel ist Fehler)' : 'Info-Text (für Lernkarten)'}" value="${obj.userData.infoText || ''}" 
+                    <input type="text" placeholder="${isError ? 'Deaktiviert (Möbel ist Fehler)' : 'Info-Text (für Lernkarten)'}" value="${safeInfoText}" 
                            onchange="app.setObjectInfo('${obj.uuid}', this.value)" ${disabled}
                            style="flex-grow:1; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:white; padding:6px 8px; border-radius:4px; font-size:11px;">
                 </div>
@@ -3484,7 +3507,6 @@ window.app.updateEditorObjectList = function() {
         }
         
         if (errorMode) {
-            // UI sperren, wenn das Objekt einen Info-Text hat
             const opacity = hasInfo ? "0.4" : "1";
             const disabled = hasInfo ? "disabled" : "";
             const btnColor = isError ? "background: #ef4444; border-color: #ef4444; color: white;" : "background: transparent; border-color: rgba(255,255,255,0.2); color: #9ca3af;";
@@ -3579,10 +3601,14 @@ window.app.updateNameTags = function() {
             
             // HTML Update (Sprechblase aufklappen wenn aktiviert - MIT WORD-WRAP FIX)
             const showBubble = tagObj.mesh.userData.showInfoBubble ? 'block' : 'none';
+            
+            // XSS-SCHUTZ: Info-Text in der Sprechblase escapen!
+            const safeInfoText = window.app.escapeHTML(tagObj.mesh.userData.infoText || '');
+
             tagObj.element.innerHTML = `
                 <div style="background: rgba(59, 130, 246, 0.9); color: white; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 15px; font-weight: 900; box-shadow: 0 4px 10px rgba(59,130,246,0.5); border: 2px solid white; cursor: pointer; text-shadow: 0 1px 2px rgba(0,0,0,0.3);">i</div>
                 <div style="display: ${showBubble}; position: absolute; bottom: 42px; left: 50%; transform: translateX(-50%); background: rgba(15, 16, 18, 0.95); border: 1px solid rgba(59, 130, 246, 0.6); padding: 14px; border-radius: 10px; color: #f3f4f6; width: max-content; max-width: 250px; font-size: 13px; line-height: 1.5; box-shadow: 0 15px 30px rgba(0,0,0,0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); text-align: left; pointer-events: none; white-space: normal; word-wrap: break-word; overflow-wrap: break-word;">
-                    ${tagObj.mesh.userData.infoText}
+                    ${safeInfoText}
                     <div style="position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%) rotate(45deg); width: 12px; height: 12px; background: rgba(15, 16, 18, 0.95); border-right: 1px solid rgba(59, 130, 246, 0.6); border-bottom: 1px solid rgba(59, 130, 246, 0.6);"></div>
                 </div>
             `;
@@ -4296,6 +4322,9 @@ window.app.renderTaskList = function() {
         }
 
         const previewText = task.type === 'mc' ? task.question : task.desc;
+        
+        // XSS-SCHUTZ: Text der Aufgabe escapen!
+        const safeText = window.app.escapeHTML(previewText);
 
         list.innerHTML += `
             <div style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; padding: 10px; position: relative;">
@@ -4304,7 +4333,7 @@ window.app.renderTaskList = function() {
                     <button onclick="app.deleteTask(${task.id})" style="background: transparent; border: none; color: #ef4444; font-size: 14px; padding: 0; margin: 0; box-shadow: none; min-width: auto;">×</button>
                 </div>
                 <div style="font-size: 12px; color: #d1d5db; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                    ${previewText}
+                    ${safeText}
                 </div>
             </div>
         `;
